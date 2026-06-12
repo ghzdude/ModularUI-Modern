@@ -136,6 +136,7 @@ public class CategoryList extends AbstractParentWidget<IWidget, CategoryList> im
 
         @Override
         public void onChildAdd(IWidget child) {
+            super.onChildAdd(child);
             if (child instanceof CategoryList categoryList) {
                 this.categories.add(categoryList);
             }

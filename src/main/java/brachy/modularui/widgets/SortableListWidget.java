@@ -134,6 +134,7 @@ public class SortableListWidget<T> extends ListValueWidget<T, SortableListWidget
 
     @Override
     public void onChildAdd(Item<T> child) {
+        super.onChildAdd(child);
         if (isValid()) {
             assignIndexes();
             this.scheduleAnimation = true;
