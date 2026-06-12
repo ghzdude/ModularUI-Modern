@@ -158,6 +158,7 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     @Getter
     @Nullable
     private Consumer<W> onUpdateListener;
+    private boolean applyStencil;
 
     public Widget() {
         resizer(new StandardResizer(this));
@@ -883,6 +884,20 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     public W name(String name) {
         setName(name);
         return getThis();
+    }
+
+    public W disableStencil() {
+        return applyStencil(false);
+    }
+
+    public W applyStencil(boolean applyStencil) {
+        this.applyStencil = applyStencil;
+        return getThis();
+    }
+
+    @Override
+    public boolean applyStencil() {
+        return this.applyStencil;
     }
 
     /**

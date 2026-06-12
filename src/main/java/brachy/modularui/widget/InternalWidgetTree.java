@@ -104,7 +104,7 @@ public class InternalWidgetTree {
         graphics.pose().popPose();
 
         // render all children if there are any
-        List<IWidget> children = parent.getChildren();
+        List<IWidget> children = viewport != null ? viewport.getStencilChildren() : parent.getChildren();
         if (!children.isEmpty()) {
             boolean backgroundSeparate = children.size() > 1;
             // draw all backgrounds first if we have more than 1 child
@@ -132,6 +132,10 @@ public class InternalWidgetTree {
                 graphics.pose().pushPose();
                 context.applyTo(graphics.pose());
                 viewport.postDraw(context, false);
+                // draw unstencil children
+                boolean backgroundSeparate = children.size() > 1;
+                if (backgroundSeparate) viewport.getUnstencilChildren().forEach(w -> drawBackground(w, context, ignoreEnabled));
+                viewport.getUnstencilChildren().forEach(w -> drawTree(w, context, false, !backgroundSeparate));
                 graphics.pose().popPose();
             } else {
                 // only remove transformation

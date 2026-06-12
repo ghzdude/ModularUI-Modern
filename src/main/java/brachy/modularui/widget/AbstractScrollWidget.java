@@ -19,6 +19,9 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A scrollable parent widget. Children can be added.
  *
@@ -29,6 +32,8 @@ public abstract class AbstractScrollWidget<I extends IWidget, W extends Abstract
         extends AbstractParentWidget<I, W> implements IViewport, Interactable {
 
     private final ScrollArea scroll = new ScrollArea();
+    private final List<IWidget> stencilChildren = new ArrayList<>();
+    private final List<IWidget> unstencilChildren = new ArrayList<>();
     private boolean scrollXActive, scrollYActive;
 
     @Getter private boolean showScrollShadows = true;
@@ -128,6 +133,33 @@ public abstract class AbstractScrollWidget<I extends IWidget, W extends Abstract
     public void onUpdate() {
         super.onUpdate();
         checkScrollbarActive(true);
+    }
+
+    @Override
+    protected void onChildAdd(I child) {
+        super.onChildAdd(child);
+        if (child.applyStencil()) {
+            stencilChildren.add(child);
+        } else {
+            unstencilChildren.add(child);
+        }
+    }
+
+    @Override
+    protected void onChildRemove(I child) {
+        super.onChildRemove(child);
+        stencilChildren.remove(child);
+        unstencilChildren.remove(child);
+    }
+
+    @Override
+    public List<IWidget> getStencilChildren() {
+        return stencilChildren;
+    }
+
+    @Override
+    public List<IWidget> getUnstencilChildren() {
+        return unstencilChildren;
     }
 
     @Override

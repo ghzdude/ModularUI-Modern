@@ -4,6 +4,8 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.screen.viewport.ModularGuiContext;
 import brachy.modularui.utils.HoveredWidgetList;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -64,6 +66,14 @@ public interface IViewport extends IWidget {
      * @param transformed if transformation from this viewport is active
      */
     default void postDraw(ModularGuiContext context, boolean transformed) {}
+
+    default List<IWidget> getStencilChildren() {
+        return getChildren();
+    }
+
+    default List<IWidget> getUnstencilChildren() {
+        return Collections.emptyList();
+    }
 
     static void getChildrenAt(IWidget parent, IViewportStack stack, HoveredWidgetList widgetList, int x, int y) {
         for (IWidget child : parent.getChildren()) {

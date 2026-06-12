@@ -403,4 +403,8 @@ public interface IWidget extends ITreeNode<IWidget> {
     default boolean isNameAndType(String name, Class<? extends IWidget> type) {
         return isName(name) && isType(type);
     }
+
+    default boolean applyStencil() {
+        return true;
+    }
 }
