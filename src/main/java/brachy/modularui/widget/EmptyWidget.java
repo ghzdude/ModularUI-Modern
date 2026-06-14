@@ -40,6 +40,19 @@ public class EmptyWidget implements IWidget {
     }
 
     @Override
+    public boolean relativeZ() {
+        return false;
+    }
+
+    @Override
+    public int getIndex() {
+        return -1;
+    }
+
+    @Override
+    public void setIndex(int index) {}
+
+    @Override
     public void dispose() {
         this.parent = null;
     }

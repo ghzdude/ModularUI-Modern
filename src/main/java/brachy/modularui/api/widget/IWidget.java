@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -42,6 +43,10 @@ public interface IWidget extends ITreeNode<IWidget> {
             .or(CharMatcher.inRange('0', '9'))
             .or(CharMatcher.anyOf("-_."))
             .negate();
+
+
+    Comparator<IWidget> DRAW_SORT = Comparator.comparingInt(IWidget::getZ)
+            .thenComparingInt(IWidget::getIndex);
 
     default String getTranslationId() {
         String className = FormattingUtil.toLowerCaseUnderscore(this.getClass().getSimpleName());
@@ -382,6 +387,16 @@ public interface IWidget extends ITreeNode<IWidget> {
 
     @Nullable
     String getName();
+
+    default int getZ() {
+        return relativeZ() ? getArea().z() + getParent().getZ() : getArea().z();
+    }
+
+    int getIndex();
+
+    boolean relativeZ();
+
+    void setIndex(int index);
 
     /**
      * The type name of this widget. This is used for codecs.

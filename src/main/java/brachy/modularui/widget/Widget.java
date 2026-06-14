@@ -163,6 +163,11 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
         resizer(new StandardResizer(this));
     }
 
+    public W relativeZ(boolean relativeZ) {
+        setRelativeZ(relativeZ);
+        return getThis();
+    }
+
     // -----------------
     // === Lifecycle ===
     // -----------------
@@ -185,6 +190,7 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
         if (isExcludeAreaInRecipeViewer()) {
             getContext().getRecipeViewerSettings().addExclusionArea(this);
         }
+        getScreen().addWidgetDraw(this);
     }
 
     /**

@@ -40,6 +40,7 @@ import net.minecraftforge.common.MinecraftForge;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import lombok.Getter;
@@ -54,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -128,6 +130,19 @@ public class ModularScreen implements Renderable {
      * true if this is an overlay for another screen
      */
     @Getter private boolean overlay = false;
+    private final ObjectAVLTreeSet<IWidget> drawOrder = new ObjectAVLTreeSet<>(IWidget.DRAW_SORT);
+
+    public void addWidgetDraw(IWidget widget) {
+        this.drawOrder.add(widget);
+    }
+
+    public void removeWidgetDraw(IWidget widget) {
+        this.drawOrder.remove(widget);
+    }
+
+    public Set<IWidget> getDrawOrder() {
+        return Collections.unmodifiableSortedSet(drawOrder);
+    }
 
     private double lastUpdate = -1, lastFrameUpdate = -1;
 
@@ -364,7 +379,8 @@ public class ModularScreen implements Renderable {
                 GuiDraw.drawRect(graphics, 0, 0, this.context.getScreenArea().w(), this.context.getScreenArea().h(),
                         Color.argb(16, 16, 16, (int) (125 * panel.getAlpha())));
             }
-            WidgetTree.drawTree(panel, this.context);
+//            WidgetTree.drawTree(panel, this.context);
+            WidgetTree.drawSortedTree(getDrawOrder(), this.context);
             // clear depth, so that anything drawn next will be guaranteed to be on top
             RenderSystem.clearDepth(1);
             RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);

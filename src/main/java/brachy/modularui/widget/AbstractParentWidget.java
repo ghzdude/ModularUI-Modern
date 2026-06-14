@@ -1,5 +1,6 @@
 package brachy.modularui.widget;
 
+import brachy.modularui.ModularUI;
 import brachy.modularui.api.drawable.IDrawable;
 import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.screen.ModularPanel;
@@ -108,6 +109,7 @@ public class AbstractParentWidget<I extends IWidget, W extends AbstractParentWid
             index += getChildren().size() + 1;
         }
         this.children.add(index, child);
+        child.setIndex(index);
         if (isValid()) {
             child.initialise(this, true);
         }
@@ -119,6 +121,9 @@ public class AbstractParentWidget<I extends IWidget, W extends AbstractParentWid
         if (this.children.remove(child)) {
             if (isValid()) {
                 child.dispose();
+                if (ModularUI.isClientThread()) {
+                    getScreen().removeWidgetDraw(child);
+                }
             }
             onChildRemove(child);
             return true;
@@ -133,6 +138,9 @@ public class AbstractParentWidget<I extends IWidget, W extends AbstractParentWid
         I child = this.children.remove(index);
         if (isValid()) {
             child.dispose();
+            if (ModularUI.isClientThread()) {
+                getScreen().removeWidgetDraw(child);
+            }
         }
         onChildRemove(child);
         return true;

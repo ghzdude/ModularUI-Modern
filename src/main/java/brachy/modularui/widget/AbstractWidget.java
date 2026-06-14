@@ -35,6 +35,8 @@ public abstract class AbstractWidget implements IWidget {
 
     private final Area area = new Area();
     private StandardResizer resizer;
+    protected boolean relativeZ = true;
+    private int parentIndex = -1;
 
     /**
      * Returns the screen of the panel of this widget is being opened in.
@@ -93,6 +95,25 @@ public abstract class AbstractWidget implements IWidget {
         }
         afterInit();
         onResized();
+    }
+
+    @Override
+    public boolean relativeZ() {
+        return hasParent() && relativeZ;
+    }
+
+    protected void setRelativeZ(boolean relativeZ) {
+        this.relativeZ = relativeZ;
+    }
+
+    @Override
+    public void setIndex(int index) {
+        this.parentIndex = index;
+    }
+
+    @Override
+    public int getIndex() {
+        return parentIndex;
     }
 
     void onInitInternal(boolean late) {}

@@ -20,6 +20,29 @@ public class DelegatingWidget extends AbstractWidget implements IDelegatingWidge
         resizer(new StandardResizer(this));
     }
 
+    @Override
+    public boolean relativeZ() {
+        return this.delegate.hasValue() ? this.delegate.get().relativeZ() : super.relativeZ();
+    }
+
+    @Override
+    public void setIndex(int index) {
+        super.setIndex(index);
+        if (this.delegate.hasValue()) {
+            this.delegate.get().setIndex(index);
+        }
+    }
+
+    @Override
+    public int getZ() {
+        return this.delegate.hasValue() ? this.delegate.get().getZ() : super.getZ();
+    }
+
+    @Override
+    public int getIndex() {
+        return this.delegate.hasValue() ? this.delegate.get().getIndex() : super.getIndex();
+    }
+
     protected void setDelegate(IWidget delegate) {
         if (!this.delegate.isEmpty()) {
             this.delegate.get().dispose();

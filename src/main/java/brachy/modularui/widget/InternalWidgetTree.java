@@ -51,6 +51,82 @@ public class InternalWidgetTree {
         return null;
     }
 
+    static void drawWidget(IWidget parent, ModularGuiContext context, boolean ignoreEnabled, boolean shouldDrawBackground) {
+        if (!parent.isEnabled() && !ignoreEnabled) return;
+        if (parent.requiresResize()) {
+            WidgetTree.resizeInternal(parent.resizer(), false);
+        }
+
+        GuiGraphics graphics = context.getGraphics();
+        float alpha = parent.getPanel().getAlpha();
+        IViewport viewport = parent instanceof IViewport ? (IViewport) parent : null;
+
+        // transform stack according to the widget
+        context.pushMatrix();
+        parent.transform(context);
+
+        boolean canBeSeen = parent.canBeSeen(context);
+
+        // apply transformations to opengl
+        graphics.pose().pushPose();
+        context.applyTo(graphics.pose());
+
+        if (canBeSeen) {
+            // draw widget
+            graphics.setColor(1f, 1f, 1f, alpha);
+            WidgetThemeEntry<?> widgetTheme = parent.getWidgetTheme(parent.getPanel().getTheme());
+            if (shouldDrawBackground) parent.drawBackground(context, widgetTheme);
+            parent.draw(context, widgetTheme);
+            parent.drawOverlay(context, widgetTheme);
+        }
+
+        if (viewport != null) {
+            if (canBeSeen) {
+                // draw viewport without children transformation
+                graphics.setColor(1f, 1f, 1f, alpha);
+                viewport.preDraw(context, false);
+                graphics.pose().popPose();
+                // apply children transformation of the viewport
+                context.pushViewport(viewport, parent.getArea());
+                viewport.transformChildren(context);
+                // apply to opengl and draw with transformation
+                graphics.pose().pushPose();
+                context.applyTo(graphics.pose());
+                viewport.preDraw(context, true);
+            } else {
+                // only transform stack
+                context.pushViewport(viewport, parent.getArea());
+                viewport.transformChildren(context);
+            }
+        }
+
+        // remove all opengl transformations
+        graphics.pose().popPose();
+
+        if (viewport != null) {
+            if (canBeSeen) {
+                // apply opengl transformations again and draw
+                graphics.setColor(1f, 1f, 1f, alpha);
+                graphics.pose().pushPose();
+                context.applyTo(graphics.pose());
+                viewport.postDraw(context, true);
+                // remove children transformation of this viewport
+                context.popViewport(viewport);
+                graphics.pose().popPose();
+                // apply transformation again to opengl and draw
+                graphics.pose().pushPose();
+                context.applyTo(graphics.pose());
+                viewport.postDraw(context, false);
+                graphics.pose().popPose();
+            } else {
+                // only remove transformation
+                context.popViewport(viewport);
+            }
+        }
+        // remove all widget transformations
+        context.popMatrix();
+    }
+
     static void drawTree(IWidget parent, ModularGuiContext context, boolean ignoreEnabled,
                          boolean shouldDrawBackground) {
         if (!parent.isEnabled() && !ignoreEnabled) return;

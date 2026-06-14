@@ -245,6 +245,11 @@ public class WidgetTree extends TreeUtil {
         drawTree(parent, context, false, true);
     }
 
+    public static void drawSortedTree(Set<IWidget> drawOrder, ModularGuiContext context) {
+        // handle widget transformations being relative to parent
+        drawOrder.forEach(w -> InternalWidgetTree.drawWidget(w, context, false, true));
+    }
+
     public static void drawTree(IWidget parent, ModularGuiContext context, boolean ignoreEnabled,
                                 boolean shouldDrawBackground) {
         InternalWidgetTree.drawTree(parent, context, ignoreEnabled, shouldDrawBackground);
