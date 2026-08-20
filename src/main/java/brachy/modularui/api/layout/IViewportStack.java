@@ -1,7 +1,7 @@
 package brachy.modularui.api.layout;
 
 import brachy.modularui.screen.viewport.TransformationMatrix;
-import brachy.modularui.utils.Rectangle;
+import brachy.modularui.utils.Point;
 import brachy.modularui.widget.sizer.Area;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -148,16 +148,17 @@ public interface IViewportStack {
     int transformY(float x, float y);
 
     /**
-     * Transforms the x and y components of an area's position with the current matrix transformations.
+     * Transforms the x and y component of a position with the current matrix transformations.
      *
-     * @param rect the area to transform
-     * @return copy of rect with transformations applied
+     * @param x x component of position
+     * @param y y component of position
+     * @return new point with transformations applied
      */
-    default Rectangle transformRect(Rectangle rect) {
-        Rectangle ret = new Rectangle(rect);
-        ret.x(transformX(rect.x, rect.y));
-        ret.y(transformY(rect.x, rect.y));
-        return ret;
+    default Point transformPoint(float x, float y) {
+        return new Point(
+                transformX(x, y),
+                transformY(x, y)
+        );
     }
 
     /**
@@ -179,16 +180,17 @@ public interface IViewportStack {
     int unTransformY(float x, float y);
 
     /**
-     * Transforms the x and y components of an area's position with the current inverted matrix transformations.
+     * Transforms the x and y components of a position with the current inverted matrix transformations.
      *
-     * @param rect the area to transform
-     * @return copy of area with transformations applied
+     * @param x x component of position
+     * @param y y component of position
+     * @return new point with transformations applied
      */
-    default Rectangle unTransformRect(Rectangle rect) {
-        Rectangle ret = new Rectangle(rect);
-        ret.x(unTransformX(rect.x, rect.y));
-        ret.y(unTransformY(rect.x, rect.y));
-        return ret;
+    default Point unTransformPoint(float x, float y) {
+        return new Point(
+                unTransformX(x, y),
+                unTransformY(x, y)
+        );
     }
 
     /**
