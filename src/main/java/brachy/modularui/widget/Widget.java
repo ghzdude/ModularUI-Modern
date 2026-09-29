@@ -26,6 +26,10 @@ import brachy.modularui.value.sync.ModularSyncManager;
 import brachy.modularui.value.sync.PanelSyncManager;
 import brachy.modularui.value.sync.SyncHandler;
 import brachy.modularui.value.sync.ValueSyncHandler;
+import brachy.modularui.widget.components.ComponentType;
+import brachy.modularui.widget.components.LayeredDrawable;
+import brachy.modularui.widget.components.TooltipComponent;
+import brachy.modularui.widget.components.WidgetComponent;
 import brachy.modularui.widget.sizer.Area;
 import brachy.modularui.widget.sizer.StandardResizer;
 import brachy.modularui.widgets.slot.ItemSlot;
@@ -41,11 +45,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * A very modular implementation of {@link IWidget}. This is the base class for almost all UI elements.
@@ -164,6 +172,29 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     private @Nullable IGuiAction.MouseStartHover mouseStartHover;
     private @Nullable IGuiAction.MouseEndHover mouseEndHover;
 
+    private final Map<ComponentType<?>, WidgetComponent> components = new HashMap<>();
+
+    public <T extends WidgetComponent> Optional<T> getComponent(ComponentType<T> componentType) {
+        //noinspection unchecked
+        return  Optional.ofNullable((T) components.get(componentType));
+    }
+
+    public <T extends WidgetComponent> void setComponent(ComponentType<T> componentType, T component) {
+        components.put(componentType, component);
+    }
+
+    public <T extends WidgetComponent> void updateComponent(ComponentType<T> componentType, T defaultValue, UnaryOperator<T> updateFunction) {
+        getComponent(componentType)
+                .or(() -> Optional.of(defaultValue))
+                .map(updateFunction)
+                .ifPresent(c -> setComponent(componentType, c));
+    }
+
+    public static final ComponentType<LayeredDrawable> SHADOW = ComponentType.named("modularui", "shadow");
+    public static final ComponentType<LayeredDrawable> BACKGROUND = ComponentType.named("modularui", "background");
+    public static final ComponentType<LayeredDrawable> OVERLAY = ComponentType.named("modularui", "overlay");
+    public static final ComponentType<TooltipComponent> TOOLTIP = ComponentType.named("modularui", "tooltip");
+
     public Widget() {
         resizer(new StandardResizer(this));
     }
@@ -248,6 +279,8 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     @Override
     public void drawBackground(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
         WidgetTheme theme = getActiveWidgetTheme(widgetTheme, isHovering());
+        getComponent(SHADOW).ifPresent(component -> component.draw(context, getArea(), theme));
+        getComponent(BACKGROUND).ifPresent(d -> d.draw(context, getArea(), theme));
         IDrawable shadow = getShadow();
         if (shadow != null) {
             shadow.drawAtZero(context, getArea(), theme);
@@ -303,10 +336,13 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
      */
     @Override
     public void drawForeground(ModularGuiContext context) {
-        RichTooltip tooltip = getTooltip();
-        if (tooltip != null && !context.getUISettings().drawTooltipExternally() && isHoveringFor(tooltip.showUpTimer())) {
-            tooltip.draw(context);
-        }
+        getComponent(TOOLTIP)
+                .filter(c -> !context.getUISettings().drawTooltipExternally() && isHoveringFor(c.tooltip().showUpTimer()))
+                .ifPresent(c -> c.tooltip().draw(context));
+//        RichTooltip tooltip = getTooltip();
+//        if (tooltip != null && !context.getUISettings().drawTooltipExternally() && isHoveringFor(tooltip.showUpTimer())) {
+//            tooltip.draw(context);
+//        }
     }
 
     public @Nullable IDrawable getThemeBackground(WidgetThemeEntry<?> widgetTheme) {

@@ -6,8 +6,6 @@ import brachy.modularui.api.widget.IWidget;
 import brachy.modularui.screen.ModularPanel;
 import brachy.modularui.screen.ModularScreen;
 import brachy.modularui.screen.viewport.ModularGuiContext;
-import brachy.modularui.widget.components.AbstractComponent;
-import brachy.modularui.widget.components.ComponentType;
 import brachy.modularui.widget.sizer.Area;
 import brachy.modularui.widget.sizer.StandardResizer;
 
@@ -16,10 +14,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Very basic implementation of {@link IWidget}.
@@ -40,13 +35,6 @@ public abstract class AbstractWidget implements IWidget {
 
     private final Area area = new Area();
     private StandardResizer resizer;
-
-    private final Map<ComponentType<?>, AbstractComponent> components = new HashMap<>();
-
-    public <T extends AbstractComponent> Optional<T> getComponent(ComponentType<T> componentType) {
-        //noinspection unchecked
-        return  Optional.ofNullable((T) components.get(componentType));
-    }
 
     /**
      * Returns the screen of the panel of this widget is being opened in.

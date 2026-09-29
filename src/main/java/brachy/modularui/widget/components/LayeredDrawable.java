@@ -1,14 +1,14 @@
 package brachy.modularui.widget.components;
 
 import brachy.modularui.api.drawable.IDrawable;
+import brachy.modularui.drawable.DrawableStack;
+import brachy.modularui.screen.viewport.GuiContext;
+import brachy.modularui.theme.WidgetTheme;
 
-public class LayeredDrawable extends AbstractComponent {
-
-    public static final ComponentType<LayeredDrawable> TYPE = new ComponentType<>();
-    IDrawable[] drawables;
+public record LayeredDrawable(DrawableStack stack) implements WidgetComponent, IDrawable {
 
     @Override
-    public ComponentType<?> getComponentType() {
-        return TYPE;
+    public void draw(GuiContext context, int x, int y, int width, int height, WidgetTheme widgetTheme) {
+        this.stack.draw(context, x, y, width, height, widgetTheme);
     }
 }
