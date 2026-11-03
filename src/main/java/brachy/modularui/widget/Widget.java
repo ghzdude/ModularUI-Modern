@@ -172,28 +172,12 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     private @Nullable IGuiAction.MouseStartHover mouseStartHover;
     private @Nullable IGuiAction.MouseEndHover mouseEndHover;
 
-    private final Map<ComponentType<?>, WidgetComponent> components = new HashMap<>();
+    private final Map<ComponentType<?>, Object> components = new HashMap<>();
 
-    public <T extends WidgetComponent> Optional<T> getComponent(ComponentType<T> componentType) {
-        //noinspection unchecked
-        return  Optional.ofNullable((T) components.get(componentType));
-    }
-
-    public <T extends WidgetComponent> void setComponent(ComponentType<T> componentType, T component) {
-        components.put(componentType, component);
-    }
-
-    public <T extends WidgetComponent> void updateComponent(ComponentType<T> componentType, T defaultValue, UnaryOperator<T> updateFunction) {
-        getComponent(componentType)
-                .or(() -> Optional.of(defaultValue))
-                .map(updateFunction)
-                .ifPresent(c -> setComponent(componentType, c));
-    }
-
-    public static final ComponentType<LayeredDrawable> SHADOW = ComponentType.named("modularui", "shadow");
-    public static final ComponentType<LayeredDrawable> BACKGROUND = ComponentType.named("modularui", "background");
-    public static final ComponentType<LayeredDrawable> OVERLAY = ComponentType.named("modularui", "overlay");
-    public static final ComponentType<TooltipComponent> TOOLTIP = ComponentType.named("modularui", "tooltip");
+    public static final ComponentType<LayeredDrawable> SHADOW = ComponentType.named("shadow");
+    public static final ComponentType<LayeredDrawable> BACKGROUND = ComponentType.named("background");
+    public static final ComponentType<LayeredDrawable> OVERLAY = ComponentType.named("overlay");
+    public static final ComponentType<TooltipComponent> TOOLTIP = ComponentType.named("tooltip");
 
     public Widget() {
         resizer(new StandardResizer(this));
@@ -279,9 +263,9 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
     @Override
     public void drawBackground(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
         WidgetTheme theme = getActiveWidgetTheme(widgetTheme, isHovering());
-        getComponent(SHADOW).ifPresent(component -> component.draw(context, getArea(), theme));
-        getComponent(BACKGROUND).ifPresent(d -> d.draw(context, getArea(), theme));
-        IDrawable shadow = getShadow();
+//        get(SHADOW).ifPresent(component -> component.draw(context, getArea(), theme));
+//        get(BACKGROUND).ifPresent(d -> d.draw(context, getArea(), theme));
+        IDrawable shadow = get(SHADOW);
         if (shadow != null) {
             shadow.drawAtZero(context, getArea(), theme);
         }
@@ -336,13 +320,10 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
      */
     @Override
     public void drawForeground(ModularGuiContext context) {
-        getComponent(TOOLTIP)
-                .filter(c -> !context.getUISettings().drawTooltipExternally() && isHoveringFor(c.tooltip().showUpTimer()))
-                .ifPresent(c -> c.tooltip().draw(context));
-//        RichTooltip tooltip = getTooltip();
-//        if (tooltip != null && !context.getUISettings().drawTooltipExternally() && isHoveringFor(tooltip.showUpTimer())) {
-//            tooltip.draw(context);
-//        }
+        RichTooltip tooltip = get(TOOLTIP).tooltip();
+        if (tooltip != null && !context.getUISettings().drawTooltipExternally() && isHoveringFor(tooltip.showUpTimer())) {
+            tooltip.draw(context);
+        }
     }
 
     public @Nullable IDrawable getThemeBackground(WidgetThemeEntry<?> widgetTheme) {
@@ -1061,5 +1042,23 @@ public class Widget<W extends Widget<W>> extends AbstractWidget implements IPosi
                 this.excludeAreaInRecipeViewer == o.excludeAreaInRecipeViewer &&
                 Objects.equals(this.tooltip, o.tooltip) &&
                 resizer().isEqual(o.resizer());
+    }
+
+    public <T> Optional<T> getOptional(ComponentType<T> componentType) {
+        return Optional.ofNullable(get(componentType));
+    }
+
+    public <T> T get(ComponentType<T> componentType) {
+        //noinspection unchecked
+        return (T) components.get(componentType);
+    }
+
+    public <T> void set(ComponentType<T> componentType, T component) {
+        components.put(componentType, component);
+    }
+
+    public <T extends WidgetComponent> void update(ComponentType<T> componentType, T defaultValue, UnaryOperator<T> updateFunction) {
+        T component = getOptional(componentType).orElse(defaultValue);
+        set(componentType, updateFunction.apply(component));
     }
 }
